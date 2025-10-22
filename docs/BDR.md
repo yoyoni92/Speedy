@@ -630,6 +630,9 @@ Phase 3 (Scale - Future):
   - Export data to Excel
   - Visual charts and trends
   - Client-specific reports
+- 🚨 **Accident reporting**
+  - Guided accident documentation process
+  - Step-by-step incident reporting for couriers
 - 🌐 **Web dashboard** (optional)
   - Admin portal for complex operations
   - Advanced filtering and search
@@ -838,6 +841,213 @@ See User Flows section (Section 4) for detailed conversation examples.
 
 ---
 
+## 14. Phase 2 Feature Specification: Accident Reporting
+
+### 14.1 Overview
+
+The accident reporting feature will be introduced in Phase 2 to provide couriers with a guided, step-by-step process for documenting motorcycle accidents. This feature ensures proper incident documentation, compliance with insurance requirements, and streamlined communication between couriers, fleet managers, and relevant authorities.
+
+### 14.2 Business Justification
+
+**Problem:**
+- Couriers often don't know proper accident documentation procedures
+- Critical information is missed during stressful post-accident situations
+- Inconsistent reporting leads to insurance claim complications
+- Fleet managers lack immediate visibility into incidents
+
+**Solution:**
+- Guided WhatsApp-based accident reporting flow
+- Structured data collection ensuring all required information is captured
+- Immediate notification to fleet manager
+- Integration with existing photo upload capabilities
+
+### 14.3 User Flow: Accident Reporting
+
+```
+ACCIDENT OCCURS
+  ↓
+[Courier opens WhatsApp with bot]
+  ↓
+[Courier selects: "דווח תאונה" from main menu]
+  ↓
+[Bot: "⚠️ דיווח תאונה - בטיחות קודם כל!
+האם אתה בטוח? האם צריך עזרה רפואית?"]
+[Buttons: "אני בטוח, אין פצועים" | "צריך עזרה רפואית - התקשר 101"]
+  ↓
+[If medical help needed → Bot provides emergency numbers and pauses process]
+[If safe to continue → Bot begins guided documentation]
+  ↓
+[Bot: "איזה אופנוע מעורב בתאונה?"]
+[Buttons: List of courier's assigned motorcycles]
+  ↓
+[Courier selects motorcycle]
+  ↓
+[Bot: "מתי קרתה התאונה?"]
+[Buttons: "עכשיו" | "לפני 30 דקות" | "לפני שעה" | "זמן אחר"]
+  ↓
+[Bot: "איפה קרתה התאונה? שלח מיקום או כתוב כתובת"]
+  ↓
+[Courier provides location]
+  ↓
+[Bot: "מה קרה? בחר את הסוג:"]
+[Buttons: "התנגשות עם רכב" | "נפילה/החלקה" | "התנגשות עם הולך רגל" | "אחר"]
+  ↓
+[Bot: "האם יש נזק לאופנוע?"]
+[Buttons: "כן, נזק קל" | "כן, נזק חמור" | "לא, אין נזק נראה לעין"]
+  ↓
+[Bot: "האם יש צד שני מעורב? (רכב אחר, הולך רגל וכו')"]
+[Buttons: "כן" | "לא"]
+  ↓
+[If yes → Bot collects other party details]
+[Bot: "פרטי הצד השני:"]
+- שם
+- מספר טלפון
+- מספר רישיון רכב (אם רלוונטי)
+- חברת ביטוח
+  ↓
+[Bot: "האם הזמנת משטרה?"]
+[Buttons: "כן, המשטרה בדרך" | "כן, המשטרה הגיעה" | "לא, לא הזמנתי"]
+  ↓
+[Bot: "עכשיו צלם תמונות של:
+1️⃣ הנזק לאופנוע
+2️⃣ מקום התאונה (רחוב, צומת)
+3️⃣ הרכב השני (אם יש)
+4️⃣ מסמכים (רישיון, ביטוח של הצד השני)
+
+שלח תמונה אחת בכל פעם"]
+  ↓
+[Courier uploads photos one by one]
+[Bot confirms each photo: "✓ תמונה התקבלה"]
+  ↓
+[Bot: "תאר במילים שלך מה קרה:"]
+  ↓
+[Courier types description]
+  ↓
+[Bot: "✅ דיווח התאונה הושלם!
+📋 מספר דיווח: ACC-2025-001234
+📞 המנהל קיבל התראה
+📄 כל הפרטים נשמרו במערכת
+
+❗ חשוב:
+- שמור את מספר הדיווח
+- אל תחתום על שום מסמך בלי לדבר עם המנהל
+- אם המשטרה מגיעה, תן להם את מספר הדיווח"]
+  ↓
+[Automatic notification sent to fleet manager]
+  ↓
+END
+```
+
+### 14.4 Data Model Extensions
+
+**New Entity: Accident_Report**
+```
+- id (unique identifier)
+- report_number (ACC-YYYY-NNNNNN format)
+- motorcycle_id (foreign key)
+- courier_id (foreign key)
+- accident_datetime (timestamp)
+- location_text (address/description)
+- location_coordinates (lat/lng if available)
+- accident_type (collision_vehicle, fall_slip, collision_pedestrian, other)
+- damage_level (none, minor, major)
+- other_party_involved (boolean)
+- police_called (boolean)
+- police_report_number (optional)
+- courier_description (text)
+- status (reported, under_review, closed)
+- created_at
+- updated_at
+```
+
+**New Entity: Accident_Photos**
+```
+- id (unique identifier)
+- accident_report_id (foreign key)
+- photo_url (file storage path)
+- photo_type (damage, scene, other_vehicle, documents)
+- uploaded_at
+```
+
+**New Entity: Other_Party_Details**
+```
+- id (unique identifier)
+- accident_report_id (foreign key)
+- name (optional)
+- phone_number (optional)
+- license_plate (optional)
+- insurance_company (optional)
+- notes (optional)
+```
+
+### 14.5 Admin Notifications
+
+When an accident is reported, the fleet manager receives:
+
+```
+🚨 דיווח תאונה חדש!
+
+👤 שליח: מתן
+🏍️ אופנוע: 125 - 488162
+📍 מיקום: רחוב דיזנגוף 50, תל אביב
+⏰ זמן: היום 14:30
+🔢 מספר דיווח: ACC-2025-001234
+
+💥 סוג: התנגשות עם רכב
+🔧 נזק: נזק קל
+👥 צד שני: כן
+🚔 משטרה: הוזמנה
+
+[צפה בפרטים המלאים] [התקשר לשליח]
+```
+
+### 14.6 Integration Points
+
+**With Existing Features:**
+- **Photo Upload System**: Leverages Phase 2 photo capabilities
+- **User Authentication**: Uses existing phone-based auth
+- **Motorcycle Management**: Links to existing motorcycle records
+- **Notification System**: Uses Phase 2 proactive notification infrastructure
+
+**With Future Features:**
+- **Insurance Integration**: API connections to insurance companies (Phase 3)
+- **Legal Documentation**: Export to legal/insurance formats (Phase 3)
+- **Analytics**: Accident pattern analysis and prevention insights (Phase 3)
+
+### 14.7 Technical Considerations
+
+**Storage Requirements:**
+- Photo storage: 5-10 photos per accident × 2MB average = 10-20MB per incident
+- Estimated 5-10 accidents per month = 50-200MB monthly storage growth
+
+**Performance:**
+- Guided flow should maintain <3 second response times
+- Photo uploads may take longer but should provide progress feedback
+- Critical: System must be reliable during stressful situations
+
+**Security:**
+- Accident photos may contain sensitive information (license plates, faces)
+- Ensure proper access controls and data retention policies
+- Consider automatic photo anonymization for privacy
+
+### 14.8 Success Metrics
+
+**Adoption:**
+- 100% of accidents reported through system within 2 weeks of feature launch
+- Average completion time <10 minutes per report
+
+**Quality:**
+- 95% of reports contain all required information
+- 90% of reports include photographic evidence
+- Zero insurance claim rejections due to insufficient documentation
+
+**Business Impact:**
+- 50% reduction in time spent on accident documentation
+- 30% faster insurance claim processing
+- Improved legal compliance and risk management
+
+---
+
 ## Document Approval
 
 | Role | Name | Signature | Date |
@@ -854,6 +1064,7 @@ See User Flows section (Section 4) for detailed conversation examples.
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-10-22 | CTO | Initial draft for technical review |
+| 1.1 | 2025-10-22 | CTO | Added accident reporting feature to Phase 2 |
 
 ---
 
