@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@/config/*": ["src/config/*"],
+      "@/common/*": ["src/common/*"],
+      "@/database/*": ["src/database/*"],
+      "@/modules/*": ["src/modules/*"],
+      "@/types/*": ["src/types/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage"
+  ]
+}
