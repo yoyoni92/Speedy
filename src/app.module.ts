@@ -8,6 +8,7 @@ import * as winston from 'winston';
 
 import { env } from './config/env.config';
 import { PrismaModule } from './database/prisma.module';
+import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 
 /**
  * Root application module for Speedy Fleet Management
@@ -78,12 +79,14 @@ import { PrismaModule } from './database/prisma.module';
     // Database
     PrismaModule,
 
-    // Feature modules will be added here as we implement them
+    // Feature modules
+    MaintenanceModule,
+    
+    // Other feature modules will be added as we implement them
     // AuthModule,
     // WebhookModule,
     // BotModule,
     // FleetModule,
-    // MaintenanceModule,
     // WhatsAppModule,
     // HealthModule,
   ],
