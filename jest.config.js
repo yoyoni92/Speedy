@@ -11,7 +11,7 @@ module.exports = {
   ],
   
   // Module resolution
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/config/(.*)$': '<rootDir>/src/config/$1',
     '^@/common/(.*)$': '<rootDir>/src/common/$1',
@@ -77,9 +77,5 @@ module.exports = {
     '<rootDir>/dist/',
   ],
   
-  // Watch plugins
-  watchPlugins: [
-    'jest-watch-typeahead/filename',
-    'jest-watch-typeahead/testname',
-  ],
+  // Watch plugins removed for compatibility
 };

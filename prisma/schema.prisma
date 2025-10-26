@@ -1,0 +1,196 @@
+// =============================================================================
+// SPEEDY FLEET MANAGEMENT - DATABASE SCHEMA
+// =============================================================================
+// This schema defines the complete data model for the Speedy MVP
+// Based on LLD.md specifications with optimized relationships
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum UserRole {
+  ADMIN
+  COURIER
+}
+
+enum MotorcycleType {
+  MOTORCYCLE_125  @map("125")
+  MOTORCYCLE_250  @map("250")
+  ELECTRIC
+}
+
+enum InsuranceType {
+  SINGLE_DRIVER
+  ANY_DRIVER
+}
+
+enum MaintenanceType {
+  NONE
+  SMALL
+  LARGE
+}
+
+enum ConversationState {
+  IDLE
+  AWAITING_MENU_SELECTION
+  AWAITING_MOTORCYCLE_SELECTION
+  AWAITING_MILEAGE_INPUT
+  AWAITING_MOTORCYCLE_DATA
+  AWAITING_CONFIRMATION
+}
+
+// =============================================================================
+// CORE ENTITIES
+// =============================================================================
+
+model User {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique @map("phone_number")
+  role        UserRole @default(COURIER)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  courier       Courier?
+  conversations Conversation[]
+
+  @@map("users")
+  @@index([phoneNumber])
+  @@index([role])
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  motorcycles Motorcycle[]
+
+  @@map("clients")
+  @@index([name])
+}
+
+model Courier {
+  id        String   @id @default(cuid())
+  userId    String   @unique @map("user_id")
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  motorcycles    Motorcycle[]
+  mileageReports MileageReport[]
+
+  @@map("couriers")
+  @@index([name])
+  @@index([userId])
+}
+
+model Motorcycle {
+  id                  String          @id @default(cuid())
+  licensePlate        String          @unique @map("license_plate")
+  type                MotorcycleType
+  currentMileage      Int             @default(0) @map("current_mileage")
+  licenseExpiryDate   DateTime        @map("license_expiry_date")
+  insuranceExpiryDate DateTime        @map("insurance_expiry_date")
+  insuranceType       InsuranceType   @map("insurance_type")
+  isActive            Boolean         @default(true) @map("is_active")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  // Foreign Keys
+  assignedCourierId   String?         @map("assigned_courier_id")
+  assignedClientId    String?         @map("assigned_client_id")
+
+  // Relationships
+  assignedCourier     Courier?              @relation(fields: [assignedCourierId], references: [id])
+  assignedClient      Client?               @relation(fields: [assignedClientId], references: [id])
+  maintenanceHistory  MaintenanceHistory[]
+  mileageReports      MileageReport[]
+
+  @@map("motorcycles")
+  @@index([licensePlate])
+  @@index([type])
+  @@index([assignedCourierId])
+  @@index([assignedClientId])
+  @@index([licenseExpiryDate])
+  @@index([insuranceExpiryDate])
+}
+
+// =============================================================================
+// MAINTENANCE TRACKING
+// =============================================================================
+
+model MaintenanceHistory {
+  id                   String          @id @default(cuid())
+  motorcycleId         String          @map("motorcycle_id")
+  maintenanceType      MaintenanceType @map("maintenance_type")
+  mileageAtMaintenance Int             @map("mileage_at_maintenance")
+  performedAt          DateTime        @default(now()) @map("performed_at")
+  notes                String?
+  createdAt            DateTime        @default(now()) @map("created_at")
+
+  // Relationships
+  motorcycle           Motorcycle      @relation(fields: [motorcycleId], references: [id], onDelete: Cascade)
+
+  @@map("maintenance_history")
+  @@index([motorcycleId])
+  @@index([maintenanceType])
+  @@index([performedAt])
+  @@index([mileageAtMaintenance])
+}
+
+model MileageReport {
+  id           String     @id @default(cuid())
+  motorcycleId String     @map("motorcycle_id")
+  courierId    String     @map("courier_id")
+  mileage      Int
+  reportedAt   DateTime   @default(now()) @map("reported_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  // Relationships
+  motorcycle   Motorcycle @relation(fields: [motorcycleId], references: [id], onDelete: Cascade)
+  courier      Courier    @relation(fields: [courierId], references: [id], onDelete: Cascade)
+
+  @@map("mileage_reports")
+  @@index([motorcycleId])
+  @@index([courierId])
+  @@index([reportedAt])
+}
+
+// =============================================================================
+// CONVERSATION MANAGEMENT
+// =============================================================================
+
+model Conversation {
+  id        String            @id @default(cuid())
+  userId    String            @map("user_id")
+  state     ConversationState @default(IDLE)
+  context   Json?             // Store conversation context as JSON
+  expiresAt DateTime?         @map("expires_at")
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  // Relationships
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("conversations")
+  @@index([userId])
+  @@index([state])
+  @@index([expiresAt])
+}
