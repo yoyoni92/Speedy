@@ -16,15 +16,15 @@ import { IClientService } from './interfaces/client.interface';
   providers: [
     // Services
     {
-      provide: IMotorcycleService,
+      provide: MotorcycleService,
       useClass: MotorcycleService,
     },
     {
-      provide: ICourierService,
+      provide: CourierService,
       useClass: CourierService,
     },
     {
-      provide: IClientService,
+      provide: ClientService,
       useClass: ClientService,
     },
     MotorcycleService,
@@ -33,9 +33,6 @@ import { IClientService } from './interfaces/client.interface';
   ],
   exports: [
     // Services
-    IMotorcycleService,
-    ICourierService,
-    IClientService,
     MotorcycleService,
     CourierService,
     ClientService,

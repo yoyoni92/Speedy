@@ -3,13 +3,16 @@
  * These types define the core business entities and their relationships
  */
 
-import { 
-  UserRole, 
-  MotorcycleType, 
-  InsuranceType, 
-  MaintenanceType, 
-  ConversationState 
+import {
+  UserRole,
+  MotorcycleType,
+  InsuranceType,
+  MaintenanceType,
+  ConversationState
 } from '@prisma/client';
+
+// Re-export Prisma enums for use throughout the application
+export { UserRole, MotorcycleType, InsuranceType, MaintenanceType, ConversationState };
 
 // =============================================================================
 // USER & AUTHENTICATION
