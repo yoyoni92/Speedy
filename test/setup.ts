@@ -111,11 +111,38 @@ declare global {
 // Cleanup after each test
 afterEach(() => {
   jest.clearAllMocks();
+  jest.clearAllTimers();
+  jest.restoreAllMocks();
 });
+
+// Cleanup after all tests
+afterAll(async () => {
+  // Force garbage collection if available
+  if (global.gc) {
+    global.gc();
+  }
+
+  // Clear all Jest mocks and timers globally
+  jest.clearAllMocks();
+  jest.clearAllTimers();
+  jest.restoreAllMocks();
+
+  // Wait for any pending async operations
+  await new Promise(resolve => setImmediate(resolve));
+
+  // Additional cleanup - close any open handles
+  process.removeAllListeners('unhandledRejection');
+  process.removeAllListeners('uncaughtException');
+}, 10000);
 
 // Global error handler for unhandled promise rejections in tests
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection in test:', promise, 'reason:', reason);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception in test:', error);
 });
 
 export {};

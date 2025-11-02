@@ -49,7 +49,7 @@ module.exports = {
   
   // Transform configuration
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
+    '^.+\\.(t|j)s$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
   
   // Module file extensions
@@ -63,14 +63,7 @@ module.exports = {
   
   // Verbose output
   verbose: true,
-  
-  // Globals for ts-jest
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-    },
-  },
-  
+
   // Ignore patterns
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
