@@ -127,6 +127,25 @@ export interface WhatsAppMessage {
   type: 'text' | 'image' | 'document';
 }
 
+export interface WebhookPayload {
+  object: string;
+  entry: WebhookEntry[];
+}
+
+export interface WebhookEntry {
+  id: string;
+  changes: WebhookChange[];
+}
+
+export interface WebhookChange {
+  value: {
+    messaging_product: string;
+    contacts?: any[];
+    messages?: any[];
+  };
+  field: string;
+}
+
 export interface WhatsAppWebhookPayload {
   entry: Array<{
     id: string;
